@@ -142,6 +142,8 @@ func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) error {
 	source_type := http.DetectContentType(body)
 	rw := newResponseWriter(w)
 	rr := newResponseReader(resp)
+	uagent = r.header().Get("User-Agent")
+	w.header().Set("User-Agent", uagent)
 	err = p.proxyResponse(rw, rr, r.Header)
 	read := rr.counter.Count()
 	written := rw.rw.Count()
