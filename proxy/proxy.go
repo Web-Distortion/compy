@@ -138,6 +138,8 @@ func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error forwarding request: %s", err)
 	}
 	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	source_type := http.DetectContentType(body)
 	rw := newResponseWriter(w)
 	rr := newResponseReader(resp)
 	err = p.proxyResponse(rw, rr, r.Header)
