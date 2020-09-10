@@ -140,10 +140,10 @@ func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) error {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	source_type := http.DetectContentType(body)
+	user_agent = r.Header().Get("User-Agent")
+	w.Header().Set("User-Agent", user_agent)
 	rw := newResponseWriter(w)
 	rr := newResponseReader(resp)
-	uagent = r.header().Get("User-Agent")
-	w.header().Set("User-Agent", uagent)
 	err = p.proxyResponse(rw, rr, r.Header)
 	read := rr.counter.Count()
 	written := rw.rw.Count()
@@ -205,6 +205,9 @@ func (p *Proxy) proxyResponse(w *ResponseWriter, r *ResponseReader, headers http
 	w.takeHeaders(r)
 	transcoder, found := p.transcoders[r.ContentType()]
 	if !found {
+		return w.ReadFrom(r)
+	}
+	if 	r.Header().Get("Content-Encoding")!=null && strings.Contains(r.Header().Get("Content-Type"),"image"){
 		return w.ReadFrom(r)
 	}
 	w.setChunked()
